@@ -1,5 +1,4 @@
-import json
-import os
+import json, os, requests
 folder_path = "C:\\Users\\yzn-\\Desktop\\YacineChatt"
 
 total_messages = 0
@@ -28,9 +27,16 @@ def total_viewcount_session(folder_path):
     vod_viewers = vod_object.get("viewCount", [])
     return(vod_viewers)
 
-def average_viewers_session(folder_path):
-    with open(folder_path, 'r', encoding="UTF-8") as f:
-        data = json.load(f)
+def get_average_viewers():
+    url = "https://twitchtracker.com/api/channels/summary/Yacine"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        average_viewers = data.get("avg_viewers", 0)
+        return average_viewers
+    else:
+        print(f"Oops! Something went wrong. Status code: {response.status_code}")
+        return 0
 
 if __name__ == "__main__":
     for filename in os.listdir(folder_path):
@@ -43,19 +49,5 @@ if __name__ == "__main__":
             total_files += 1
             total_vod_length += vod_count
             vod_viewers += vod_viewers_count
-
-print(f"Totalt får denna twitchare ungefär {round(total_messages/(total_vod_length))} meddelanden per minut. Twitcharen har en average viewer på {average_viewers} och i genomsnitt {round(vod_viewers/total_files)} som kollar per VOD. ")
-
-
-#length of stream 
-#average per stream * length of stream i minuter och sen tar average of these numbers och dela med average of minuter streamade
-
-
-
-
-
-
-
-
-#print(f"Total VOD längd: {int(total_vod_length)/60} timmar, totala meddelanden: {total_messages} och totala vods {total_files}")
-# print(f"Denna twitchare får totalt {total_vod_length / (total_messages / total_files)} meddelanden i minuten!")
+average_viewers = get_average_viewers()
+print(f"Totalt får denna twitchare ungefär {round(total_messages/(total_vod_length))} meddelanden per minut. Twitcharen har en average viewer på {average_viewers} och i genomsnitt {round(vod_viewers/total_files)} som kollar per VOD, totalt {total_files} stycken!")
